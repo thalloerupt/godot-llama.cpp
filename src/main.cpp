@@ -155,6 +155,7 @@ int main(int argc, char ** argv) {
     std::vector<char> formatted(llama_n_ctx(ctx));
     int prev_len = 0;
     while (true) {
+        
         // get user input
         printf("\033[32m> \033[0m");
         std::string user;
@@ -163,6 +164,7 @@ int main(int argc, char ** argv) {
         if (user.empty()) {
             break;
         }
+        
 
         const char * tmpl = llama_model_chat_template(model, /* name */ nullptr);
 

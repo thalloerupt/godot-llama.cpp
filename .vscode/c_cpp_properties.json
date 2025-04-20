@@ -2,12 +2,12 @@
     "configurations": [
         {
             "name": "Win32",
-            "includePath": [
-                "${workspaceFolder}/llama.cpp/common**",
-                "${vcpkgRoot}/x64-windows/include",
-                "${workspaceFolder}/llama.cpp/include",
-                "${workspaceFolder}/llama.cpp/ggml/include"
-            ],
+           "includePath": [
+                    "${workspaceFolder}/**",
+                     "${workspaceFolder}/llama.cpp",
+                    "${workspaceFolder}/llama.cpp/include"
+                    ],
+
             "defines": [
                 "_DEBUG",
                 "UNICODE",
