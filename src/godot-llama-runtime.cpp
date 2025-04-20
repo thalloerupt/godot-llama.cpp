@@ -4,7 +4,7 @@ llama_model* load_model(const char *model_path, int n_ctx, int ngl) {
     // only print errors
     llama_log_set([](enum ggml_log_level level, const char * text, void * /* user_data */) {
         if (level >= GGML_LOG_LEVEL_ERROR) {
-            fprintf(stderr, "%s", text);
+            fprintf(stderr, "%s", text); 
         }
     }, nullptr);
 
