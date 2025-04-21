@@ -1,4 +1,14 @@
 #include "llama.h"
+#include "godot-llama.hpp"
+
+struct godot_llama_runtime
+{
+    llama_model* model;
+    llama_context * ctx;
+    llama_vocab * vocab;
+};
+
+
 
 llama_model* load_model(const char *model_path, int n_ctx, int ngl) {
     // only print errors
@@ -29,4 +39,10 @@ llama_model* load_model(const char *model_path, int n_ctx, int ngl) {
 
     
     return model;
+}
+
+
+void open_session(const godot_llama_session session){
+    
+    
 }
