@@ -1,4 +1,4 @@
-#include <vector>
+﻿#include <vector>
 #include <string>
 #include <ctime>
 #include <map>
@@ -15,10 +15,11 @@ struct ConversationMeta {
 class MultiConversationManager {
 private:
     llama_model* model;
-    llama_context_params ctx_params;
     std::map<int, llama_context*> contexts;
     std::map<int, std::vector<llama_token>> histories;
     std::map<int, ConversationMeta> metas;
+    std::map<int, std::vector<llama_chat_message>> session_messages;
+    std::map<int, int> session_index;
     int next_id;
     size_t max_history_tokens;
     const llama_vocab * vocab;
@@ -50,15 +51,36 @@ private:
         }
     }
 
+
+    std::string create_prompt(std::string input,std::vector<llama_chat_message> messages,int prev_len){
+        const char * tmpl = llama_model_chat_template(model, /* name */ nullptr);
+        std::vector<char> formatted(1024);
+        // add the user input to the message list and format it
+        messages.push_back({"user", strdup(input.c_str())});
+        int new_len = llama_chat_apply_template(tmpl, messages.data(), messages.size(), true, formatted.data(), formatted.size());
+        if (new_len > (int)formatted.size()) {
+            formatted.resize(new_len);
+            new_len = llama_chat_apply_template(tmpl, messages.data(), messages.size(), true, formatted.data(), formatted.size());
+        }
+        if (new_len < 0) {
+            fprintf(stderr, "failed to apply the chat template\n");
+            return "";
+        }
+
+        // remove previous messages to obtain the prompt to generate the response
+        std::string prompt(formatted.begin() + prev_len, formatted.begin() + new_len);
+        return prompt;
+
+    }
+
+
 public:
     MultiConversationManager(llama_model* model, 
-                           const llama_context_params& params,
                            const llama_vocab* _vocab,
-                           llama_sampler * smpl,
                            size_t max_history = 2048
                            
                            )
-        : model(model), ctx_params(params), next_id(0),vocab(_vocab),smpl(smpl) ,max_history_tokens(max_history) {}
+        : model(model),next_id(0),vocab(_vocab),max_history_tokens(max_history) {}
 
     ~MultiConversationManager() {
         for (auto& pair : contexts) {
@@ -69,8 +91,24 @@ public:
     // 创建新对话
     int createConversation(const std::string& title = "") {
         int conv_id = next_id++;
-        contexts[conv_id] = llama_new_context_with_model(model, ctx_params);
-        histories[conv_id] = std::vector<llama_token>();
+        llama_context_params ctx_params = llama_context_default_params();
+        ctx_params.n_ctx = 2048;
+        ctx_params.n_batch = 2048;
+        llama_context * ctx = llama_init_from_model(model, ctx_params);
+        // initialize the sampler
+        smpl = llama_sampler_chain_init(llama_sampler_chain_default_params());
+        llama_sampler_chain_add(smpl, llama_sampler_init_min_p(0.05f, 1));
+        llama_sampler_chain_add(smpl, llama_sampler_init_temp(0.8f));
+        llama_sampler_chain_add(smpl, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
+
+        std::vector<llama_chat_message> messages;
+        messages.push_back({"user", strdup("")});
+        session_index.insert({conv_id,0});
+        session_messages.insert({conv_id,messages});
+
+
+        contexts.insert({conv_id, ctx});
+        histories.insert({conv_id, {std::vector<llama_token>()}});
         metas[conv_id] = {
             title.empty() ? "对话" + std::to_string(conv_id) : title,
             std::time(nullptr),
@@ -92,14 +130,23 @@ public:
         return true;
     }
 
+
+
     
 
     // 生成响应
-    std::string generate (int conv_id,const std::string & prompt) {
+    std::string generate (int conv_id,const std::string & input) {
         std::string response;
+        std::cout << "故事对话响应:\n" << contexts.size() << "\r\n";
+        
         llama_context * ctx = contexts[conv_id];
+        int index = session_index[conv_id];
 
-        const bool is_first = llama_kv_self_used_cells(ctx) == 0;
+        const bool is_first = true;
+
+       
+
+        std::string prompt = create_prompt(input,session_messages[conv_id],index);
 
         
 
