@@ -1,8 +1,10 @@
 ﻿#include <vector>
 #include <string>
 #include <ctime>
+#include <iostream>
 #include <map>
 #include "llama.h"
+#include <string.h>
 
 // 对话元数据结构
 struct ConversationMeta {
@@ -56,7 +58,7 @@ private:
         const char * tmpl = llama_model_chat_template(model, /* name */ nullptr);
         std::vector<char> formatted(1024);
         // add the user input to the message list and format it
-        messages.push_back({"user", strdup(input.c_str())});
+        messages.push_back({"user", strdupa(input.c_str())});
         int new_len = llama_chat_apply_template(tmpl, messages.data(), messages.size(), true, formatted.data(), formatted.size());
         if (new_len > (int)formatted.size()) {
             formatted.resize(new_len);
@@ -102,7 +104,6 @@ public:
         llama_sampler_chain_add(smpl, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
 
         std::vector<llama_chat_message> messages;
-        messages.push_back({"user", strdup("")});
         session_index.insert({conv_id,0});
         session_messages.insert({conv_id,messages});
 
@@ -136,9 +137,7 @@ public:
 
     // 生成响应
     std::string generate (int conv_id,const std::string & input) {
-        std::string response;
-        std::cout << "故事对话响应:\n" << contexts.size() << "\r\n";
-        
+        std::string response;        
         llama_context * ctx = contexts[conv_id];
         int index = session_index[conv_id];
 
