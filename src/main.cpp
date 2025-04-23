@@ -55,7 +55,7 @@ int main(int argc, char ** argv) {
     std::cout << "\033[32m技术对话响应:\033[0m\n" << std::endl;
 
     // 在技术对话中交互
-    std::string tech_response = manager.generate(tech_conv, "hello");
+    std::string tech_response = manager.generate(tech_conv, "hello,whats your name?");
 
     std::cout << "\n\n\033[32m故事对话响应:\033[0m\n"  << "\n";
     // 在故事对话中交互
@@ -74,8 +74,11 @@ int main(int argc, char ** argv) {
               << "Token数: " << tech_meta.token_count << "\n\n";
 
     // 清理
-    llama_free_model(model);
+    llama_model_free(model);
     llama_backend_free();
 
     return 0;
 }
+
+
+

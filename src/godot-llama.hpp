@@ -54,11 +54,10 @@ private:
     }
 
 
-    std::string create_prompt(std::string input,std::vector<llama_chat_message> messages,int prev_len){
+    std::string create_prompt(std::string input,std::vector<llama_chat_message> messages,std::vector<char> formatted,int prev_len){
         const char * tmpl = llama_model_chat_template(model, /* name */ nullptr);
-        std::vector<char> formatted(1024);
         // add the user input to the message list and format it
-        messages.push_back({"user", strdupa(input.c_str())});
+        messages.push_back({"user", strdup(input.c_str())});
         int new_len = llama_chat_apply_template(tmpl, messages.data(), messages.size(), true, formatted.data(), formatted.size());
         if (new_len > (int)formatted.size()) {
             formatted.resize(new_len);
@@ -143,9 +142,10 @@ public:
 
         const bool is_first = true;
 
-       
+        std::vector<char> formatted(llama_n_ctx(ctx));
 
-        std::string prompt = create_prompt(input,session_messages[conv_id],index);
+
+        std::string prompt = create_prompt(input,session_messages[conv_id],formatted,index);
 
         
 
