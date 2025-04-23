@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
+#include <common.h>
 int main(int argc, char ** argv) {
         std::string model_path;
 
@@ -26,12 +26,18 @@ int main(int argc, char ** argv) {
 
 
 
-       // 初始化llama.cpp
+    // 初始化llama.cpp
     ggml_backend_load_all();
+    
+    
 
     // 加载模型
     llama_model_params model_params = llama_model_default_params();
+    
+   
+    
     model_params.n_gpu_layers = 99;
+    
     llama_model* model = llama_model_load_from_file(model_path.c_str() , model_params);
     const llama_vocab * vocab = llama_model_get_vocab(model);
     if (!model) {

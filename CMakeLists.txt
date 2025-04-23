@@ -20,8 +20,8 @@ endif()
 set(LIB_NAME lib.${CMAKE_SYSTEM_NAME}.${ARCH_NAME})
 set(src_files
  "src/main.cpp"
- "src/gdexample.cpp"
- "src/gdexample.h"
+ "src/gdllamanpc.cpp"
+ "src/gdllamanpc.h"
  "src/register_types.cpp"
  "src/register_types.h"
  "src/godot-llama.hpp"

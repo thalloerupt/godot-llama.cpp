@@ -94,7 +94,7 @@ public:
         int conv_id = next_id++;
         llama_context_params ctx_params = llama_context_default_params();
         ctx_params.n_ctx = 2048;
-        ctx_params.n_batch = 2048;
+        ctx_params.n_batch = 512;
         llama_context * ctx = llama_init_from_model(model, ctx_params);
         // initialize the sampler
         smpl = llama_sampler_chain_init(llama_sampler_chain_default_params());

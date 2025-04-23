@@ -1,0 +1,13 @@
+[configuration]
+
+entry_symbol = "example_library_init"
+compatibility_minimum = "4.4"
+
+
+[libraries]
+
+
+windows.debug.x86_64 = "bin/lib.windows.amd64.dll"
+windows.release.x86_64 = "bin/lib.windows.amd64.dll"
+
+
