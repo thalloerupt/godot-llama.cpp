@@ -3,6 +3,21 @@
 entry_symbol = "example_library_init"
 compatibility_minimum = "4.4"
 
+[dependencies]
+windows.debug = {
+    "bin/ggml.dll" : "",
+    "bin/ggml-base.dll" : "",
+	"bin/ggml-cpu.dll" : "",
+    "bin/ggml-vulkan.dll" : "",
+    "bin/llama.dll" : ""
+}
+windows.release = {
+    "bin/ggml.dll" : "",
+    "bin/ggml-base.dll" : "",
+	"bin/ggml-cpu.dll" : "",
+    "bin/ggml-vulkan.dll" : "",
+    "bin/llama.dll" : ""
+}
 
 [libraries]
 

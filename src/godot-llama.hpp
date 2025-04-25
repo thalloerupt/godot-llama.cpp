@@ -5,6 +5,8 @@
 #include <map>
 #include "llama.h"
 #include <string.h>
+#include <functional>
+#pragma once
 
 // 对话元数据结构
 struct ConversationMeta {
@@ -135,8 +137,9 @@ public:
     
 
     // 生成响应
-    std::string generate (int conv_id,const std::string & input) {
-        std::string response;        
+    std::string generate (int conv_id,const std::string & input,std::function<void(const std::string&)> callback) {
+        std::string response;
+        std::string lineBuffer;         
         llama_context * ctx = contexts[conv_id];
         int index = session_index[conv_id];
 
@@ -189,10 +192,15 @@ public:
                 GGML_ABORT("failed to convert token to piece\n");
             }
             std::string piece(buf, n);
-            printf("%s", piece.c_str());
             fflush(stdout);
             response += piece;
-
+            lineBuffer += piece; // 将新生成的 token 添加到缓冲区
+            size_t pos;
+            while ((pos = lineBuffer.find('\n')) != std::string::npos) {
+                std::string line = lineBuffer.substr(0, pos);
+                callback(line);
+                lineBuffer.erase(0, pos + 1); // +1 去掉 \n 本身
+            }
             // prepare the next batch with the sampled token
             batch = llama_batch_get_one(&new_token_id, 1);
         }

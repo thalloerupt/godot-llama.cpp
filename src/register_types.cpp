@@ -1,7 +1,7 @@
 #include "register_types.h"
 
 #include "gdllamanpc.h"
-
+#include "gdllamaholder.h"
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
@@ -14,6 +14,7 @@ void initialize_example_module(ModuleInitializationLevel p_level) {
 	}
 
 	GDREGISTER_RUNTIME_CLASS(GDLlamaNPC);
+	GDREGISTER_RUNTIME_CLASS(GDLlamaHolder);
 }
 
 void uninitialize_example_module(ModuleInitializationLevel p_level) {

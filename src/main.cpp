@@ -61,15 +61,15 @@ int main(int argc, char ** argv) {
     std::cout << "\033[32m技术对话响应:\033[0m\n" << std::endl;
 
     // 在技术对话中交互
-    std::string tech_response = manager.generate(tech_conv, "hello,whats your name?");
+    std::string tech_response = manager.generate(tech_conv, "hello,whats your name?",[](const std::string& output){});
 
     std::cout << "\n\n\033[32m故事对话响应:\033[0m\n"  << "\n";
     // 在故事对话中交互
-    std::string story_response = manager.generate(story_conv, "写一个关于人工智能的短故事开头，设定在未来的火星殖民地");
+    std::string story_response = manager.generate(story_conv, "写一个关于人工智能的短故事开头，设定在未来的火星殖民地",[](const std::string& output){});
     
     std::cout << "\n\n\033[32m技术对话响应:\033[0m\n" << "\n";
     // 继续技术对话
-    tech_response = manager.generate(tech_conv, "能给出具体的代码示例吗?");
+    tech_response = manager.generate(tech_conv, "能给出具体的代码示例吗?",[](const std::string& output){});
     
 
     // 显示对话信息

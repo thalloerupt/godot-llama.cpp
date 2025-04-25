@@ -33,6 +33,42 @@ String string_std_to_gd(std::string s) {
     return new_s;
 }
 
+std::string format(std::string name,std::string description,std::string actions,std::string input_action){
+    std::string prompt = R"(你是一个游戏中的NPC，请根据以下人物设定信息，以第一人称做出自然且合理的反应，并以结构化JSON格式输出结果，用于驱动游戏逻辑。
+请你等待玩家的输入。
+## 你是NPC，
+你应该结合人物设定和玩家输入，从可以执行的动作中选择出合理的动作。
+角色设定如下：
+姓名name：)" + name +
+R"(\n身份description：)"+ description +
+R"(
+\n可以执行的动作action：)" + actions +
+R"(\n请将你的回答以逐行 JSON 格式输出，每一行是一个独立的 JSON 对象：
+- 第一行为 NPC 名称
+- 第二行为 NPC 当前情绪
+- 第三行为 NPC 说的话
+- 第四行开始为一条行为（action）
+- 最后一行为 npc_state_update
+
+示例输出：
+{"npc_name": ""}
+{"emotion": ""}
+{"dialogue": ""}
+{"action": {"type": ""}}
+{"npc_state_update": {"trust_level": 3}}
+
+不要输出额外说明，不要包含数组或嵌套结构，每一行都是一个完整JSON对象，便于流式解析，
+仅输出json，不要使用markdown等格式。)" + R"(\n\n玩家输入:\n)"+input_action + R"(
+)";
+    return prompt
+
+
+;
+}
+
+
+
+
 // https://stackoverflow.com/questions/28270310/how-to-easily-detect-utf8-encoding-in-the-string
 bool is_utf8(const char * string)
 {
