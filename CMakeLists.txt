@@ -5,9 +5,12 @@ project(llama_inference)
 
 
 
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        option(LLAMA_CURL "Enable CURL support" OFF)  # 默认关闭
+  option(LLAMA_CURL "Enable CURL support" OFF)  # 默认关闭CURL
 endif()
+
+
 set(CMAKE_CXX_STANDARD 17)
 set(LLAMA_BUILD_COMMON On)
 
@@ -19,6 +22,7 @@ if (APPLE)
 else()
   set(ARCH_NAME ${CMAKE_SYSTEM_PROCESSOR})
 endif()
+
 
 set(LIB_NAME lib.${CMAKE_SYSTEM_NAME}.${ARCH_NAME})
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
@@ -43,8 +47,6 @@ add_library(${LIB_NAME} SHARED ${src_files})
 target_link_libraries(
         ${LIB_NAME} PRIVATE godot-cpp common llama 
 )
-
-
 
 
 

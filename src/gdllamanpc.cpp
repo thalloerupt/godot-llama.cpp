@@ -85,7 +85,9 @@ void GDLlamaNPC::_ready() {
 		print_error("GDLlamaNPC must be a child of GDLlamaHolder!");
 		return;
 	}
-	
+	_managers = std::move(llama_holder->_managers);
+
+	id =  _managers.get() ->createConversation("Introduce yourself");
 	
 	
 
@@ -129,14 +131,10 @@ void GDLlamaNPC::set_actions(const String p_actions) {
 void GDLlamaNPC::input_action(const String p_input_actions) {
 	std::thread([this,p_input_actions]() {
 
-
-		MultiConversationManager *manager = llama_holder->_managers.get();
-		int id =  manager ->createConversation("Introduce yourself");
-
 		std::string input_prompt = format(name_npc, description, actions,string_gd_to_std(p_input_actions));
 		print_line_rich(string_std_to_gd(input_prompt));
 
-		std::string tech_response = manager->generate(id, input_prompt, [this, input_prompt](const std::string& output) mutable {
+		std::string tech_response = _managers.get()->generate(id, input_prompt, [this, input_prompt](const std::string& output) mutable {
 			// print the token to the console
 			call_deferred("emit_signal", "generate_text_json", string_std_to_gd(output));
 		});

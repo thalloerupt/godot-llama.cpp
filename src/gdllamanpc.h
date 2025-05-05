@@ -16,6 +16,9 @@ private:
 	std::string description;
 	std::string actions;
 	GDLlamaHolder *llama_holder;
+	std::unique_ptr<MultiConversationManager> _managers;
+	int id = -1;
+
 
 protected:
 	static void _bind_methods();
@@ -23,6 +26,10 @@ protected:
 public:
 	GDLlamaNPC();
 	~GDLlamaNPC();
+
+
+
+
 
 	String get_name() const;
 	void set_name(const String p_name);
