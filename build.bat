@@ -13,6 +13,7 @@ REM 进入 build 文件夹并执行 cmake
 cd build
 cmake ..  -DLLAMA_CURL=OFF   -DGGML_VULKAN=ON
 cmake --build . --config Release
+cmake --install .
 
 REM 暂停，以便查看输出（可选）
 pause

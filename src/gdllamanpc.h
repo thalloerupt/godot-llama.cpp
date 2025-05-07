@@ -44,6 +44,7 @@ public:
 	void _process(double delta) override;
 	void _ready() override;
 	void input_action(const String p_input_actions);
+	void input_dialog(const String p_input_dialog);
 };
 
 }

@@ -61,9 +61,12 @@ void GDLlamaNPC::_bind_methods() {
 
 
 	ClassDB::bind_method(D_METHOD("input_action","p_input_actions"), &GDLlamaNPC::input_action);
+	ClassDB::bind_method(D_METHOD("input_dialog","p_input_dialog"), &GDLlamaNPC::input_dialog);
+
+
 
 	ADD_SIGNAL(MethodInfo("generate_text_json", PropertyInfo(Variant::STRING, "text_json")));
-
+	ADD_SIGNAL(MethodInfo("generate_text_dialog", PropertyInfo(Variant::STRING, "text_dialog")));
 
 }
 
@@ -131,12 +134,32 @@ void GDLlamaNPC::set_actions(const String p_actions) {
 void GDLlamaNPC::input_action(const String p_input_actions) {
 	std::thread([this,p_input_actions]() {
 
-		std::string input_prompt = format(name_npc, description, actions,string_gd_to_std(p_input_actions));
+		std::string input_prompt = format_json(name_npc, description, actions,string_gd_to_std(p_input_actions));
+		print_line_rich(string_std_to_gd(input_prompt));
+
+		std::string tech_response = _managers.get()->generate_by_line(id, input_prompt, [this, input_prompt](const std::string& output) mutable {
+			// print the token to the console
+			call_deferred("emit_signal", "generate_text_json", string_std_to_gd(output));
+		});
+		
+		
+
+	}).detach();
+	
+
+
+}
+
+void GDLlamaNPC::input_dialog(const String p_input_dialog) {
+	std::thread([this,p_input_dialog]() {
+
+		std::string input_prompt = format_prompt(name_npc, description,string_gd_to_std(p_input_dialog));
 		print_line_rich(string_std_to_gd(input_prompt));
 
 		std::string tech_response = _managers.get()->generate(id, input_prompt, [this, input_prompt](const std::string& output) mutable {
 			// print the token to the console
-			call_deferred("emit_signal", "generate_text_json", string_std_to_gd(output));
+
+			call_deferred("emit_signal", "generate_text_dialog", string_std_to_gd(output));
 		});
 		
 		

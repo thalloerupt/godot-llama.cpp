@@ -137,7 +137,7 @@ public:
     
 
     // 生成响应
-    std::string generate (int conv_id,const std::string & input,std::function<void(const std::string&)> callback) {
+    std::string generate_by_line (int conv_id,const std::string & input,std::function<void(const std::string&)> callback) {
         std::string response;
         std::string lineBuffer;         
         llama_context * ctx = contexts[conv_id];
@@ -201,6 +201,71 @@ public:
                 callback(line);
                 lineBuffer.erase(0, pos + 1); // +1 去掉 \n 本身
             }
+            // prepare the next batch with the sampled token
+            batch = llama_batch_get_one(&new_token_id, 1);
+        }
+
+        return response;
+    };
+
+
+
+    std::string generate (int conv_id,const std::string & input,std::function<void(const std::string&)> callback) {
+        std::string response;
+        std::string lineBuffer;         
+        llama_context * ctx = contexts[conv_id];
+        int index = session_index[conv_id];
+
+        const bool is_first = llama_kv_self_used_cells(ctx) == 0;;
+
+        std::vector<char> formatted(llama_n_ctx(ctx));
+
+
+        std::string prompt = create_prompt(input,session_messages[conv_id],formatted,index);
+
+        
+
+        // tokenize the prompt
+        const int n_prompt_tokens = -llama_tokenize(vocab, prompt.c_str(), prompt.size(), NULL, 0, is_first, true);
+        std::vector<llama_token> prompt_tokens(n_prompt_tokens);
+        if (llama_tokenize(vocab, prompt.c_str(), prompt.size(), prompt_tokens.data(), prompt_tokens.size(), is_first, true) < 0) {
+            GGML_ABORT("failed to tokenize the prompt\n");
+        }
+
+        // prepare a batch for the prompt
+        llama_batch batch = llama_batch_get_one(prompt_tokens.data(), prompt_tokens.size());
+        llama_token new_token_id;
+        while (true) {
+            // check if we have enough space in the context to evaluate this batch
+            int n_ctx = llama_n_ctx(ctx);
+            int n_ctx_used = llama_kv_self_used_cells(ctx);
+            if (n_ctx_used + batch.n_tokens > n_ctx) {
+                exit(0);
+            }
+
+            if (llama_decode(ctx, batch)) {
+                GGML_ABORT("failed to decode\n");
+            }
+
+            // sample the next token
+            new_token_id = llama_sampler_sample(smpl, ctx, -1);
+
+            // is it an end of generation?
+            if (llama_vocab_is_eog(vocab, new_token_id)) {
+                break;
+            }
+
+            // convert the token to a string, print it and add it to the response
+            char buf[256];
+            
+            int n = llama_token_to_piece(vocab, new_token_id, buf, sizeof(buf), 0, false);
+            if (n < 0) {
+                GGML_ABORT("failed to convert token to piece\n");
+            }
+            std::string piece(buf, n);
+            response += piece;
+            lineBuffer += piece; // 将新生成的 token 添加到缓冲区
+            callback(piece);
             // prepare the next batch with the sampled token
             batch = llama_batch_get_one(&new_token_id, 1);
         }
